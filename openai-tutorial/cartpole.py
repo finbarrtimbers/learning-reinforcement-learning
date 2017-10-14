@@ -1,7 +1,7 @@
 import gym
 import numpy as np
-import pylab
 import random
+import matplotlib.pyplot as plt
 
 env = gym.make('CartPole-v0')
 env.reset()
@@ -14,59 +14,45 @@ class CartPoleAgent:
         self.value = [0, 0]
         self.parameters = np.random.rand(4) * 2 - 1
         self.best_reward = float("-inf")
+        self.alpha = 0.1
 
-    def update(self, total_reward):
+    def update(self, total_reward, method='hill_climbing'):
         if total_reward > self.best_reward:
             self.best_reward = total_reward
             self.best_parameters = self.parameters
             print("Updated params")
-        self.parameters = np.random.rand(4) * 2 - 1
-
+        if method == 'random':
+            self.parameters = np.random.rand(4) * 2 - 1
+        elif method == 'hill_climbing':
+            self.update_step = (np.random.rand(4) * 2 - 1)
+            self.parameters = self.best_parameters
+            self.parameters += self.alpha * self.update_step
     def action(self, observation):
         action = 0 if np.matmul(self.parameters, observation) < 0 else 1
         return action
 
-agent = CartPoleAgent()
-observation = [0] * 4
-total_reward = 0
-for _ in range(1000):
-    env.reset()
-    observation = [0] * 4
+def run_episode(env, agent):
+    observation = env.reset()
     total_reward = 0
-    while not done:
-        #if done:
-        #    env.reset()
-        #env.render()
-        # observation = x, x_dot, theta, theta_dot
+    for _ in range(200):
         observation, reward, done, info = env.step(agent.action(observation))
-        observations.append(observation)
         total_reward += reward
-    agent.update(total_reward)
+        if done:
+            break
+    return total_reward
 
-agent.parameters = agent.best_parameters
-print(agent.best_reward)
-env.reset()
-done = False
-while not done:
-    #if done:
-    #    env.reset()
-    env.render()
-    # observation = x, x_dot, theta, theta_dot
-    observation, reward, done, info = env.step(agent.action(observation))
-    observations.append(observation)
-    total_reward += reward
-print(f"total_reward: {total_reward}")
+def main():
+    agent = CartPoleAgent()
+    observation = [0] * 4
+    rewards = []
+    total_reward = 0
+    for _ in range(100):
+        env.reset()
+        total_reward = run_episode(env, agent)
+        agent.update(total_reward)
+        rewards.append(total_reward)
+    plt.hist(total_reward)
+    plt.title("Total rewards for CartPole agent.")
 
-t = range(len(observations))
-observations = np.array(observations)
-desc = {0: 'x',
-        1: 'x_dot',
-        2: 'theta',
-        3: 'theta_dot'}
-for i in range(observations.shape[1]):
-    pylab.plot(t, observations[:, i], label=desc[i])
-pylab.legend(loc='upper right')
-pylab.draw()
-pylab.pause(1)
-input("Hit enter to close")
-pylab.close()
+
+main()
