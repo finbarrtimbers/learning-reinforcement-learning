@@ -9,8 +9,9 @@ The following Python packages:
 - Open AI gym
 - Numpy
 - Matplotlib
+- Tensorflow
 
-Install with `pip install 'gym[all]' numpy matplotlib`.
+Install with `pip install 'gym[all]' numpy matplotlib tensorflow`.
 
 # Credits
 
